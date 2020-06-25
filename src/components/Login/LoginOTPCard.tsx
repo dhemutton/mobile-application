@@ -55,6 +55,7 @@ export const LoginOTPCard: FunctionComponent<LoginOTPCard> = ({
   const [resendDisabledTime, setResendDisabledTime] = useState(
     RESEND_OTP_TIME_LIMIT
   );
+  const [resendWarningMessage, setResendWarningMessage] = useState("");
   const { setAuthInfo } = useAuthenticationContext();
 
   useEffect(() => {
@@ -111,10 +112,7 @@ export const LoginOTPCard: FunctionComponent<LoginOTPCard> = ({
     try {
       const res: any = await requestOTP(mobileNumber, codeKey, endpoint);
       if (res && res.message && typeof res.message === "string") {
-        Alert.alert("Resend OTP?", res.message, [
-          { text: "RESEND" },
-          { text: "CANCEL" }
-        ]);
+        setResendWarningMessage(res.message);
       }
       setIsResending(false);
       setResendDisabledTime(RESEND_OTP_TIME_LIMIT);
@@ -129,6 +127,24 @@ export const LoginOTPCard: FunctionComponent<LoginOTPCard> = ({
         }
       );
     }
+  };
+
+  const alertBeforeResend = (): void => {
+    Alert.alert(
+      "Resend OTP?",
+      resendWarningMessage,
+      [
+        {
+          text: "RESEND",
+          onPress: async () => {
+            await resendOTP();
+            setResendWarningMessage("");
+          }
+        },
+        { text: "CANCEL" }
+      ],
+      { cancelable: false }
+    );
   };
 
   const handleChange = (text: string): void => {
@@ -154,7 +170,9 @@ export const LoginOTPCard: FunctionComponent<LoginOTPCard> = ({
           ) : (
             <SecondaryButton
               text="Resend"
-              onPress={resendOTP}
+              onPress={
+                resendWarningMessage === "" ? resendOTP : alertBeforeResend
+              }
               isLoading={isResending}
               disabled={isLoading}
             />
