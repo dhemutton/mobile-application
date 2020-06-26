@@ -37,17 +37,21 @@ const styles = StyleSheet.create({
 
 interface LoginOTPCard extends NavigationProps {
   setLoginStage: Dispatch<SetStateAction<LoginStage>>;
+  setLastResendWarningMessage: Dispatch<SetStateAction<string>>;
   mobileNumber: string;
   codeKey: string;
   endpoint: string;
+  lastResendWarningMessage: string;
 }
 
 export const LoginOTPCard: FunctionComponent<LoginOTPCard> = ({
   navigation,
   setLoginStage,
+  setLastResendWarningMessage,
   mobileNumber,
   codeKey,
-  endpoint
+  endpoint,
+  lastResendWarningMessage
 }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [isResending, setIsResending] = useState(false);
@@ -55,7 +59,7 @@ export const LoginOTPCard: FunctionComponent<LoginOTPCard> = ({
   const [resendDisabledTime, setResendDisabledTime] = useState(
     RESEND_OTP_TIME_LIMIT
   );
-  const [resendWarningMessage, setResendWarningMessage] = useState("");
+
   const { setAuthInfo } = useAuthenticationContext();
 
   useEffect(() => {
@@ -111,8 +115,8 @@ export const LoginOTPCard: FunctionComponent<LoginOTPCard> = ({
     setIsResending(true);
     try {
       const res: any = await requestOTP(mobileNumber, codeKey, endpoint);
-      if (res && res.message && typeof res.message === "string") {
-        setResendWarningMessage(res.message);
+      if (res && res.warning && typeof res.warning === "string") {
+        setLastResendWarningMessage(res.warning);
       }
       setIsResending(false);
       setResendDisabledTime(RESEND_OTP_TIME_LIMIT);
@@ -132,13 +136,13 @@ export const LoginOTPCard: FunctionComponent<LoginOTPCard> = ({
   const alertBeforeResend = (): void => {
     Alert.alert(
       "Resend OTP?",
-      resendWarningMessage,
+      lastResendWarningMessage,
       [
         {
           text: "RESEND",
           onPress: async () => {
             await resendOTP();
-            setResendWarningMessage("");
+            setLastResendWarningMessage("");
           }
         },
         { text: "CANCEL" }
@@ -171,7 +175,7 @@ export const LoginOTPCard: FunctionComponent<LoginOTPCard> = ({
             <SecondaryButton
               text="Resend"
               onPress={
-                resendWarningMessage === "" ? resendOTP : alertBeforeResend
+                lastResendWarningMessage === "" ? resendOTP : alertBeforeResend
               }
               isLoading={isResending}
               disabled={isLoading}

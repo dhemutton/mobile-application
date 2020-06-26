@@ -79,6 +79,7 @@ export const InitialisationContainer: FunctionComponent<NavigationProps> = ({
   const [endpointTemp, setEndpointTemp] = useState("");
   const showHelpModal = useContext(HelpModalContext);
   const messageContent = useContext(ImportantMessageContentContext);
+  const [lastResendWarningMessage, setLastResendWarningMessage] = useState("");
 
   useEffect(() => {
     Sentry.addBreadcrumb({
@@ -201,15 +202,18 @@ export const InitialisationContainer: FunctionComponent<NavigationProps> = ({
                 setMobileNumber={setMobileNumber}
                 codeKey={codeKey}
                 endpoint={endpointTemp}
+                setLastResendWarningMessage={setLastResendWarningMessage}
               />
             )}
             {loginStage === "OTP" && (
               <LoginOTPCard
                 navigation={navigation}
                 setLoginStage={setLoginStage}
+                setLastResendWarningMessage={setLastResendWarningMessage}
                 mobileNumber={mobileNumber}
                 codeKey={codeKey}
                 endpoint={endpointTemp}
+                lastResendWarningMessage={lastResendWarningMessage}
               />
             )}
             <FeatureToggler feature="HELP_MODAL">
