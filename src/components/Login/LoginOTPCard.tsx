@@ -16,6 +16,7 @@ import { LoginStage } from "./types";
 import { NavigationProps } from "../../types";
 import { useAuthenticationContext } from "../../context/auth";
 import { validateOTP, requestOTP } from "../../services/auth";
+import { hasOwnProperty } from "./utils";
 
 const RESEND_OTP_TIME_LIMIT = 30 * 1000;
 
@@ -114,8 +115,13 @@ export const LoginOTPCard: FunctionComponent<LoginOTPCard> = ({
   const resendOTP = async (): Promise<void> => {
     setIsResending(true);
     try {
-      const res: any = await requestOTP(mobileNumber, codeKey, endpoint);
-      if (res && res.warning && typeof res.warning === "string") {
+      const res = await requestOTP(mobileNumber, codeKey, endpoint);
+      if (
+        typeof res === "object" &&
+        res !== null &&
+        hasOwnProperty(res, "warning") &&
+        typeof res.warning === "string"
+      ) {
         setLastResendWarningMessage(res.warning);
       }
       setIsResending(false);
