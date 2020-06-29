@@ -149,7 +149,7 @@ export const useCart = (
         }
         const quotaResponse = await getQuota(ids, authKey, endpoint);
         if (hasNegativeQuota(quotaResponse)) {
-          Sentry.captureException(new Error("Negative Quota Received"));
+          Sentry.captureException("Negative Quota Received");
           setCartState("NO_QUOTA");
         } else if (hasNoQuota(quotaResponse)) {
           setCartState("NO_QUOTA");
