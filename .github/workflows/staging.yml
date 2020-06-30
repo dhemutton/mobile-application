@@ -1,0 +1,30 @@
+name: Staging
+
+# Controls when the action will run. Triggers the workflow on push or pull request
+# events but only for the master branch
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: "10.x"
+      - uses: expo/expo-github-action@v5
+        with:
+          expo-version: 3.x
+          expo-username: ${{ secrets.EXPO_CLI_USERNAME }}
+          expo-password: ${{ secrets.EXPO_CLI_PASSWORD }}
+          expo-packager: npm
+      - run: npm install
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm run sls-config-check
+      - run: npm run test -- --coverage
+      - run: expo publish --release-channel default

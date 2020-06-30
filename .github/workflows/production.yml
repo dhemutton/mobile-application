@@ -1,0 +1,25 @@
+name: Production deploy
+on:
+  release:
+    types: [published]
+
+jobs:
+  prod-deploy:
+    name: Production deploy
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@master
+      - uses: expo/expo-github-action@v5
+        with:
+          expo-version: 3.x
+          expo-username: ${{ secrets.EXPO_CLI_USERNAME }}
+          expo-password: ${{ secrets.EXPO_CLI_PASSWORD }}
+          expo-packager: npm
+      - run: npm install
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm run sls-config-check
+      - run: npm run test -- --coverage
+      - run: expo publish --release-channel default
